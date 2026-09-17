@@ -1,121 +1,320 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>IKE & YEZ — The Beginning</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>IKE & YEZ — Where Are We Going?</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#100d20;color:#fff;font-family:system-ui,sans-serif;touch-action:none}canvas{position:fixed;inset:0;width:100%;height:100%}
-#ui{position:fixed;inset:0;pointer-events:none}.card{background:#0c0918d9;border:1px solid #ffffff2b;border-radius:15px;padding:9px 12px;backdrop-filter:blur(8px);box-shadow:0 8px 25px #0007}
-#brand{position:absolute;top:10px;left:10px;font-weight:950;letter-spacing:.12em}#meters{position:absolute;left:10px;top:54px;width:190px;font-size:12px}.row{display:flex;justify-content:space-between}.bar{height:7px;background:#fff2;border-radius:8px;margin:3px 0 7px;overflow:hidden}.fill{height:100%}#cf{background:#ff68ae}#tf{background:#9b7cff}
-#obj{position:absolute;right:10px;top:10px;text-align:right;font-size:12px}.objectiveDone{color:#77f1cf}
-#speech{position:absolute;left:50%;bottom:13px;transform:translateX(-50%);max-width:76vw;text-align:center;font-weight:750}
-#toast{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);font-size:23px;font-weight:950;opacity:0;transition:.15s}
-#acts{position:absolute;right:10px;bottom:12px;width:220px;display:grid;grid-template-columns:1fr 1fr;gap:6px;pointer-events:auto}.act{border:1px solid #fff2;border-radius:12px;background:#171229e8;color:#fff;padding:8px 5px;font-weight:900;font-size:11px}.act small{display:block;opacity:.55}
-#pad{position:absolute;left:10px;bottom:12px;width:145px;height:145px;pointer-events:auto}.padbtn{position:absolute;width:48px;height:48px;border:1px solid #fff2;border-radius:13px;background:#111b;color:#fff;font-size:18px;font-weight:900}.u{left:49px}.d{left:49px;bottom:0}.l{left:0;top:49px}.r{right:0;top:49px}
-#start,#finish{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;text-align:center;background:radial-gradient(circle at 50% 25%,#633777,#120e21 66%)}#finish{display:none}.box{max-width:600px;padding:30px}.box h1{font-size:clamp(42px,12vw,82px);line-height:.88;letter-spacing:.07em;margin:0 0 12px}.box p{line-height:1.55;opacity:.82}.go{border:0;border-radius:14px;padding:14px 23px;background:#ff69ae;color:#fff;font-size:17px;font-weight:950}
-@media(min-width:900px){#pad{display:none}}@media(max-width:600px){#acts{width:190px}.act{font-size:10px;padding:7px}.card{padding:8px 10px}}
-</style></head>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#15101f;color:#fff;font-family:system-ui,-apple-system,Segoe UI,sans-serif;touch-action:none}
+canvas{display:block}
+#game{position:fixed;inset:0}
+#hud{position:fixed;inset:0;pointer-events:none}
+#top{position:absolute;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;gap:10px}
+.panel{background:rgba(20,15,30,.78);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:10px 12px;backdrop-filter:blur(8px)}
+#who{font-weight:800}
+#objective{max-width:55vw;font-size:13px}
+#stats{position:absolute;left:12px;bottom:135px;display:flex;gap:7px;flex-wrap:wrap;max-width:65vw}
+.stat{font-size:12px}
+#select{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(rgba(15,9,25,.55),rgba(15,9,25,.82));z-index:20}
+#selectBox{width:min(92vw,720px);padding:24px;text-align:center}
+#selectBox h1{font-size:clamp(28px,8vw,56px);margin:0 0 6px}
+#selectBox p{opacity:.82;margin:0 0 22px}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.card{border:2px solid rgba(255,255,255,.18);border-radius:22px;padding:20px;background:rgba(255,255,255,.07);color:#fff}
+.card:active{transform:scale(.98)}
+.avatar{height:150px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:76px;margin-bottom:12px}
+.ike .avatar{background:linear-gradient(145deg,#4b2b72,#a875e6)}
+.yez .avatar{background:linear-gradient(145deg,#9d356e,#f28fc0)}
+.card h2{margin:4px 0}
+.card small{opacity:.8}
+#controls{position:fixed;inset:0;pointer-events:none;z-index:10}
+#stick{position:absolute;left:22px;bottom:24px;width:128px;height:128px;border-radius:50%;background:rgba(255,255,255,.11);border:2px solid rgba(255,255,255,.2);pointer-events:auto}
+#knob{position:absolute;left:50%;top:50%;width:58px;height:58px;margin:-29px;border-radius:50%;background:rgba(255,255,255,.34);border:2px solid rgba(255,255,255,.45)}
+.actions{position:absolute;right:18px;bottom:18px;width:190px;height:185px;pointer-events:none}
+.btn{position:absolute;width:58px;height:58px;border-radius:50%;border:1px solid rgba(255,255,255,.3);background:rgba(28,21,40,.86);color:#fff;font-weight:800;font-size:11px;pointer-events:auto}
+.btn:active{transform:scale(.92);background:rgba(255,255,255,.25)}
+#attack{right:0;top:48px;width:72px;height:72px}
+#dodge{left:48px;bottom:0}
+#guard{left:0;top:78px}
+#interact{right:24px;top:0}
+#ability{left:52px;top:56px;background:rgba(125,72,180,.88)}
+#lock{position:absolute;right:15px;top:92px;width:52px;height:42px;border-radius:14px;border:1px solid rgba(255,255,255,.25);background:rgba(20,15,30,.8);color:#fff;font-weight:800;pointer-events:auto}
+#switch{position:absolute;right:15px;top:142px;width:88px;height:42px;border-radius:14px;border:1px solid rgba(255,255,255,.25);background:rgba(20,15,30,.8);color:#fff;font-weight:800;pointer-events:auto}
+#hint{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;background:rgba(20,15,30,.82);border-radius:12px;padding:7px 12px;font-size:12px;opacity:.9}
+#toast{position:fixed;left:50%;top:78px;transform:translateX(-50%);background:rgba(20,15,30,.9);border-radius:14px;padding:10px 15px;z-index:30;display:none;font-weight:700}
+@media(max-width:480px){#objective{max-width:48vw}.avatar{height:120px}.actions{transform:scale(.9);transform-origin:right bottom}.cards{gap:9px}.card{padding:13px}}
+</style>
+</head>
 <body>
-<canvas id="c"></canvas>
-<div id="ui">
- <div id="brand" class="card">IKE & YEZ</div>
- <div id="meters" class="card"><div class="row"><b>❤️ Connection</b><span id="cv">50</span></div><div class="bar"><div id="cf" class="fill" style="width:50%"></div></div><div class="row"><b>⚡ Tension</b><span id="tv">10</span></div><div class="bar"><div id="tf" class="fill" style="width:10%"></div></div><div class="row"><span>Gems</span><b id="gv">0 / 8</b></div></div>
- <div id="obj" class="card"><b>THE BEGINNING</b><br><span id="goal">Collect 5 gems</span></div>
- <div id="speech" class="card">Something strange is waiting ahead.</div><div id="toast" class="card"></div>
- <div id="acts">
-  <button class="act" onclick="ability('shield')">🛡 SHIELD<small>protect Yez</small></button><button class="act" onclick="ability('charm')">✨ CHARM<small>talk to NPC</small></button>
-  <button class="act" onclick="ability('insight')">🧠 INSIGHT<small>see hidden route</small></button><button class="act" onclick="ability('flood')">💧 FLOOD<small>Yez changes terrain</small></button>
-  <button class="act" onclick="ability('rage')">🦍 GORILLA<small>smash obstacles</small></button><button class="act" onclick="ability('lovey')">❤️ LOVEY<small>launch Yez</small></button>
- </div>
- <div id="pad"><button class="padbtn u">▲</button><button class="padbtn d">▼</button><button class="padbtn l">◀</button><button class="padbtn r">▶</button></div>
+<div id="game"></div>
+
+<div id="select">
+  <div id="selectBox" class="panel">
+    <h1>IKE & YEZ</h1>
+    <p>Where are we going?</p>
+    <div class="cards">
+      <button class="card ike" id="chooseIke">
+        <div class="avatar">🧍🏾‍♂️</div>
+        <h2>IKE</h2><small>Shield • Charm • Tactical Insight</small>
+      </button>
+      <button class="card yez" id="chooseYez">
+        <div class="avatar">🧍🏾‍♀️</div>
+        <h2>YEZ</h2><small>Flood • Gorilla Rage • Lovey-Dovey</small>
+      </button>
+    </div>
+  </div>
 </div>
-<div id="start"><div class="box"><h1>IKE<br>& YEZ</h1><h2>THE BEGINNING</h2><p>Find the glowing gems. Talk to the strange resident. Help Yez cross the broken route. Use the launch mechanic to reach the portal.</p><button class="go" id="play">START ADVENTURE</button></div></div>
-<div id="finish"><div class="box"><h1>WHERE ARE<br>WE GOING?</h1><h2>The portal opens.</h2><p>You made it through the first world. Something much stranger is on the other side.</p><button class="go" onclick="location.reload()">PLAY AGAIN</button></div></div>
 
-<script>
-const c=document.getElementById('c'),ctx=c.getContext('2d');let W,H,DPR;
-function resize(){DPR=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;c.width=W*DPR;c.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0)}addEventListener('resize',resize);resize();
+<div id="hud">
+  <div id="top">
+    <div class="panel"><div id="who">Choose a character</div><div id="objective">Explore the Beginning</div></div>
+    <div class="panel" id="mission">MISSION 1</div>
+  </div>
+  <div id="stats">
+    <div class="panel stat">HP <b id="hp">100</b></div>
+    <div class="panel stat">Connection <b id="connection">0</b></div>
+    <div class="panel stat">Tension <b id="tension">0</b></div>
+    <div class="panel stat">Orbs <b id="orbs">0</b>/5</div>
+  </div>
+</div>
 
-const keys={up:false,down:false,left:false,right:false};let started=false,finished=false,last=performance.now();
-let P={x:-40,y:160,vx:0,vy:0,on:false},Y={x:20,y:150,vx:0,vy:0},cam={x:-40,y:0};
-let conn=50,tension=10,gems=0,shield=false,rage=0,insight=0,npcTalk=false,bridge=false,portalOpen=false;
-const platforms=[
-{x:-250,y:230,w:650,h:70,c:'#75499a'},{x:220,y:110,w:230,h:55,c:'#f19bc4'},{x:480,y:10,w:240,h:55,c:'#62d0c0'},
-{x:770,y:150,w:230,h:55,c:'#f1c75d'},{x:1040,y:20,w:360,h:65,c:'#6f8fdd'},{x:-620,y:40,w:230,h:55,c:'#a487df'},
-{x:-800,y:270,w:300,h:60,c:'#5c9fd8'}];
-const gemsPos=[[-190,180],[10,180],[270,60],[530,-40],[820,100],[1120,-40],[-550,-5],[-720,230]];
-const G=gemsPos.map((a,i)=>({x:a[0],y:a[1],got:false,i}));
-const enemies=[{x:120,y:180,r:22,hp:3},{x:350,y:60,r:22,hp:3},{x:650,y:-40,r:24,hp:4}];
-const spikes=[{x:185,y:184,w:55,h:18},{x:445,y:64,w:45,h:18},{x:725,y:164,w:55,h:18}];
-const npc={x:-120,y:170};
-const portal={x:1130,y:-80};
+<div id="controls">
+  <div id="stick"><div id="knob"></div></div>
+  <div class="actions">
+    <button class="btn" id="interact">INTERACT</button>
+    <button class="btn" id="attack">ATTACK</button>
+    <button class="btn" id="guard">GUARD</button>
+    <button class="btn" id="ability">ABILITY</button>
+    <button class="btn" id="dodge">DODGE</button>
+  </div>
+  <button id="lock">LOCK</button>
+  <button id="switch">SWITCH</button>
+  <div id="hint">Move • explore • fight • solve</div>
+</div>
+<div id="toast"></div>
 
-function say(t){document.getElementById('speech').textContent=t}
-function toast(t){let e=document.getElementById('toast');e.textContent=t;e.style.opacity=1;clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.opacity=0,850)}
-function ability(a){
- if(!started||finished)return;
- if(a==='shield'){shield=!shield;say(shield?'Ike: “Stay behind me.”':'Ike lowers the shield.');toast(shield?'SHIELD UP':'SHIELD DOWN')}
- if(a==='charm'){npcTalk=true;conn=Math.min(100,conn+10);say('NPC: “The teal island controls the bridge. Try talking to me again.”');toast('✨ CHARM WORKED')}
- if(a==='insight'){insight=4;say('Ike sees the safe route and the hidden switch.');toast('🧠 ROUTE REVEALED')}
- if(a==='flood'){bridge=true;tension=Math.min(100,tension+7);say('Yez: “I AM FINE.” *FLOOD*');toast('💧 WATER MOVES THE BRIDGE')}
- if(a==='rage'){rage=2;tension=Math.min(100,tension+15);say('Yez becomes absurdly strong.');toast('🦍 GORILLA RAGE')}
- if(a==='lovey'){conn=Math.min(100,conn+14);let dx=Y.x-P.x,dy=Y.y-P.y,d=Math.hypot(dx,dy);if(d<150){Y.x+=dx/d*260;Y.y+=dy/d*260;Y.vy=-220;say('Ike: “I SAID I WAS BUSY!” — YEZ LAUNCHED');toast('❤️ YEZ LAUNCHED')}else say('Yez: “Come here.” Ike: “No.”')}
+<script type="module">
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
+
+const game=document.querySelector("#game");
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x211735);
+scene.fog=new THREE.Fog(0x211735,35,105);
+
+const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,180);
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;
+game.appendChild(renderer.domElement);
+
+scene.add(new THREE.HemisphereLight(0xffddff,0x24172d,2.2));
+const sun=new THREE.DirectionalLight(0xffffff,2.2);
+sun.position.set(12,25,10); sun.castShadow=true; scene.add(sun);
+
+const ground=new THREE.Mesh(new THREE.CylinderGeometry(42,46,1.2,64),new THREE.MeshStandardMaterial({color:0x5d3d68}));
+ground.position.y=-.6; ground.receiveShadow=true; scene.add(ground);
+
+const paths=[];
+function box(x,y,z,w,h,d,c=0x76518c){
+ const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshStandardMaterial({color:c}));
+ m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;scene.add(m);return m;
 }
-window.ability=ability;
-function bind(el,k){['pointerdown','touchstart'].forEach(e=>el.addEventListener(e,x=>{x.preventDefault();keys[k]=true}));['pointerup','pointercancel','pointerleave','touchend'].forEach(e=>el.addEventListener(e,x=>{x.preventDefault();keys[k]=false}))}
-bind(document.querySelector('.u'),'up');bind(document.querySelector('.d'),'down');bind(document.querySelector('.l'),'left');bind(document.querySelector('.r'),'right');
-addEventListener('keydown',e=>{let k=e.key.toLowerCase();if(k==='w'||k==='arrowup')keys.up=true;if(k==='s'||k==='arrowdown')keys.down=true;if(k==='a'||k==='arrowleft')keys.left=true;if(k==='d'||k==='arrowright')keys.right=true;if('123456'.includes(e.key))ability(['shield','charm','insight','flood','rage','lovey'][+e.key-1])});
-addEventListener('keyup',e=>{let k=e.key.toLowerCase();if(k==='w'||k==='arrowup')keys.up=false;if(k==='s'||k==='arrowdown')keys.down=false;if(k==='a'||k==='arrowleft')keys.left=false;if(k==='d'||k==='arrowright')keys.right=false});
-document.getElementById('play').onclick=()=>{started=true;document.getElementById('start').style.display='none';say('Ike: “Where are we going?” Yez: “I don’t know.”')};
+function orb(x,z){
+ const m=new THREE.Mesh(new THREE.IcosahedronGeometry(.55,1),new THREE.MeshStandardMaterial({color:0xffd86b,emissive:0x7a4d16,emissiveIntensity:.7}));
+ m.position.set(x,1,z);m.userData.orb=true;scene.add(m);return m;
+}
+for(const p of [[-13,-9],[12,-13],[-18,10],[18,12],[3,18]]) orb(...p);
+box(0,1,-18,12,2,2,0x4d315f);
+box(-18,1,0,2,2,12,0x4d315f);
+box(18,1,0,2,2,12,0x4d315f);
 
-function groundAt(x,y,vy){let best=null;for(const p of platforms){if(x>p.x-p.w/2&&x<p.x+p.w/2&&y+22<=p.y+10&&y+22+vy*.05>=p.y-8)if(best===null||p.y<best)best=p.y}return best}
-function update(dt){
- let ax=(keys.right?1:0)-(keys.left?1:0),ay=(keys.down?1:0)-(keys.up?1:0),n=Math.hypot(ax,ay)||1;ax/=n;ay/=n;
- let sp=rage>0?320:230;P.vx+=(ax*sp-P.vx)*Math.min(1,dt*10);if(!ax)P.vx*=Math.pow(.025,dt);
- P.vy+=620*dt;P.x+=P.vx*dt;P.y+=P.vy*dt;
- let g=groundAt(P.x,P.y,P.vy);if(g!==null&&P.vy>=0){P.y=g-22;P.vy=0;P.on=true}else P.on=false;
- if(keys.up&&P.on){P.vy=-390;keys.up=false}
- P.x=Math.max(-900,Math.min(1250,P.x));if(P.y>520){P.x=-40;P.y=120;P.vy=0;say('Ike: “That was not the route.”')}
- // Yez follows but can be launched.
- let dx=P.x-Y.x,dy=P.y-Y.y,d=Math.hypot(dx,dy);if(d>115){Y.vx=dx/d*145;Y.vy+=620*dt;Y.x+=Y.vx*dt;Y.y+=Y.vy*dt;let yg=groundAt(Y.x,Y.y,Y.vy);if(yg!==null&&Y.vy>=0){Y.y=yg-22;Y.vy=0}}
- // gems
- for(const g of G)if(!g.got&&Math.hypot(P.x-g.x,P.y-g.y)<45){g.got=true;gems++;conn=Math.min(100,conn+3);toast('+1 GEM');say(gems===5?'The portal mechanism is waking up.':'A strange little gem. Keep going.')}
- // enemies: simple patrol and knockback with rage
- for(const e of enemies){e.x+=Math.sin(performance.now()/700+e.x)*dt*18;if(Math.hypot(P.x-e.x,P.y-e.y)<45){if(rage>0){e.hp-=dt*3;e.x+=(e.x<P.x?-1:1)*120*dt;toast('BONK!')}else if(!shield){tension=Math.min(100,tension+dt*10);P.x+=(P.x<e.x?-1:1)*100*dt}}}
- // spikes
- for(const s of spikes)if(P.x>s.x-s.w/2&&P.x<s.x+s.w/2&&Math.abs(P.y-s.y)<38&&!shield){tension=Math.min(100,tension+8);P.x-=90;say('IKE: “Okay. Watch the spikes.”')}
- if(rage>0)rage-=dt;if(insight>0)insight-=dt;
- bridge=bridge||gems>=5;
- if(gems>=5)document.getElementById('goal').textContent='Reach the portal on the blue island';
- if(gems>=5&&Math.hypot(P.x-portal.x,P.y-portal.y)<100){finished=true;document.getElementById('finish').style.display='flex'}
- cam.x+=(P.x-cam.x)*Math.min(1,dt*5);cam.y+=(P.y-cam.y)*Math.min(1,dt*5);
+const portal=new THREE.Mesh(new THREE.TorusGeometry(3,0.45,18,48),new THREE.MeshStandardMaterial({color:0x75d8ff,emissive:0x2a8fb0,emissiveIntensity:1.3}));
+portal.position.set(0,3,24);scene.add(portal);
+
+function makeChar(type){
+ const g=new THREE.Group();
+ const isIke=type==="Ike";
+ const body=new THREE.Mesh(new THREE.CapsuleGeometry(.65,1.25,6,12),new THREE.MeshStandardMaterial({color:isIke?0x6f45a8:0xc95791}));
+ body.position.y=1.25; body.castShadow=true; g.add(body);
+ const head=new THREE.Mesh(new THREE.SphereGeometry(.62,16,12),new THREE.MeshStandardMaterial({color:isIke?0x5a352a:0x75422f}));
+ head.position.y=2.55;head.scale.set(.92,1,.92);head.castShadow=true;g.add(head);
+ const hair=new THREE.Mesh(new THREE.SphereGeometry(.66,16,8),new THREE.MeshStandardMaterial({color:0x171318}));
+ hair.position.set(0,2.88,0);hair.scale.set(1,.45,1);g.add(hair);
+ for(const sx of [-.35,.35]){
+  const leg=box(0,0,0,.32,.9,.32,0x22202a);leg.position.set(sx,.55,0);g.add(leg);
+ }
+ g.userData.type=type;return g;
 }
-function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r)}
-function char(x,y,b,a,kind){ctx.save();ctx.translate(x,y);let bob=Math.sin(performance.now()/150+(kind==='Yez'?1:0))*2;ctx.translate(0,bob);ctx.fillStyle='#0005';ctx.beginPath();ctx.ellipse(0,26,25,8,0,0,7);ctx.fill();ctx.fillStyle=b;ctx.beginPath();ctx.ellipse(0,0,23,31,0,0,7);ctx.fill();ctx.beginPath();ctx.arc(0,-34,27,0,7);ctx.fill();ctx.fillStyle='#18131d';ctx.beginPath();ctx.arc(0,-44,28,Math.PI,Math.PI*2);ctx.fill();ctx.fillStyle=a;ctx.fillRect(-18,-3,36,7);ctx.fillStyle='#111';ctx.beginPath();ctx.arc(-9,-35,3,0,7);ctx.arc(9,-35,3,0,7);ctx.fill();if(kind==='Yez'&&rage>0){ctx.fillStyle='#ff4d83';ctx.fillRect(-22,-53,9,5);ctx.fillRect(13,-53,9,5)}ctx.restore()}
-function dog(x,y,s,c,name){ctx.save();ctx.translate(x,y);ctx.fillStyle='#0004';ctx.beginPath();ctx.ellipse(0,9,s*1.3,s*.35,0,0,7);ctx.fill();ctx.fillStyle=c;ctx.beginPath();ctx.ellipse(0,0,s*1.2,s*.7,0,0,7);ctx.fill();ctx.beginPath();ctx.arc(s*.85,-5,s*.55,0,7);ctx.fill();if(name==='MYSTICAL'){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(s*.68,-8,4,0,7);ctx.fill();ctx.fillStyle='#58a7ff';ctx.beginPath();ctx.arc(s*1.02,-8,4,0,7);ctx.fill()}ctx.restore()}
-function draw(){
- ctx.fillStyle='#141025';ctx.fillRect(0,0,W,H);ctx.save();ctx.translate(W/2-cam.x,H/2-cam.y);
- // background stars
- for(let i=0;i<70;i++){let x=(i*173)%2300-1100,y=(i*97)%1500-750;ctx.fillStyle='#ffffff18';ctx.fillRect(x,y,2,2)}
- for(const p of platforms){ctx.fillStyle=p.c;rr(p.x-p.w/2,p.y-p.h/2,p.w,p.h,20);ctx.fill();ctx.fillStyle='#ffffff18';ctx.fillRect(p.x-p.w/2,p.y-p.h/2,p.w,8)}
- // broken bridge indicator
- if(!bridge){ctx.fillStyle='#3a314d';ctx.fillRect(400,-5,110,30);ctx.fillStyle='#ff6bb0';ctx.font='bold 14px system-ui';ctx.fillText('FLOOD',420,18)}else{ctx.strokeStyle='#65e4d2';ctx.lineWidth=20;ctx.beginPath();ctx.moveTo(400,0);ctx.lineTo(500,0);ctx.stroke()}
- // spikes
- for(const s of spikes){ctx.fillStyle='#ff648f';for(let x=s.x-s.w/2;x<s.x+s.w/2;x+=13){ctx.beginPath();ctx.moveTo(x,s.y+9);ctx.lineTo(x+6,s.y-11);ctx.lineTo(x+12,s.y+9);ctx.fill()}}
- // npc
- ctx.fillStyle='#f7cf6a';ctx.beginPath();ctx.arc(npc.x,npc.y-35,22,0,7);ctx.fill();ctx.fillStyle='#5d3c78';ctx.fillRect(npc.x-20,npc.y-10,40,36);ctx.fillStyle='#fff';ctx.font='bold 12px system-ui';ctx.fillText(npcTalk?'THANKS!':'NPC',npc.x-23,npc.y-58);
- // gems
- for(const g of G)if(!g.got){ctx.save();ctx.translate(g.x,g.y);ctx.rotate(performance.now()/500+g.i);ctx.fillStyle=['#ffe06a','#66e4cf','#ff6db4'][g.i%3];ctx.beginPath();ctx.moveTo(0,-13);ctx.lineTo(11,0);ctx.lineTo(0,13);ctx.lineTo(-11,0);ctx.closePath();ctx.fill();ctx.restore()}
- // enemies
- for(const e of enemies)if(e.hp>0){ctx.fillStyle='#d94f83';ctx.beginPath();ctx.arc(e.x,e.y-5,e.r,0,7);ctx.fill();ctx.fillStyle='#19131f';ctx.beginPath();ctx.arc(e.x-7,e.y-10,3,0,7);ctx.arc(e.x+7,e.y-10,3,0,7);ctx.fill()}
- // portal
- ctx.save();ctx.translate(portal.x,portal.y);ctx.rotate(performance.now()/1300);ctx.strokeStyle=gems>=5?'#ff62dc':'#5e5070';ctx.lineWidth=18;ctx.beginPath();ctx.arc(0,0,70,0,7);ctx.stroke();ctx.strokeStyle='#7df8ff';ctx.lineWidth=7;ctx.beginPath();ctx.arc(0,0,48,0,7);ctx.stroke();ctx.restore();
- // dogs
- dog(-310,190,16,'#17171c','STAR');dog(-470,190,24,'#292832','ROCK');dog(250,90,21,'#b59176','MYSTICAL');
- if(shield){ctx.strokeStyle='#a6d7ff';ctx.lineWidth=7;ctx.beginPath();ctx.arc(P.x,P.y-5,48,0,7);ctx.stroke()}
- char(Y.x,Y.y,'#95516f','#ff70b5','Yez');char(P.x,P.y,'#482650','#a56be8','Ike');
- ctx.restore();
+const ike=makeChar("Ike"), yez=makeChar("Yez");
+ike.position.set(-2,0,4);yez.position.set(2,0,4);
+scene.add(ike,yez);
+
+const enemies=[];
+function makeEnemy(x,z){
+ const g=new THREE.Group();
+ const b=new THREE.Mesh(new THREE.SphereGeometry(.8,12,10),new THREE.MeshStandardMaterial({color:0x9a4e5e}));
+ b.position.y=.8;b.castShadow=true;g.add(b);
+ g.position.set(x,0,z);g.userData.hp=40;g.userData.enemy=true;scene.add(g);enemies.push(g);
 }
-function loop(now){requestAnimationFrame(loop);let dt=Math.min(.035,(now-last)/1000);last=now;if(started&&!finished)update(dt);document.getElementById('cv').textContent=Math.round(conn);document.getElementById('tv').textContent=Math.round(tension);document.getElementById('cf').style.width=conn+'%';document.getElementById('tf').style.width=tension+'%';document.getElementById('gv').textContent=gems+' / 8';draw()}
-loop(performance.now());
-</script></body></html>
+[[-8,-5],[9,-3],[-8,14],[10,9]].forEach(p=>makeEnemy(...p));
+
+let selected="Ike";
+let player=ike, companion=yez;
+let hp=100,connection=0,tension=0,orbCount=0;
+let yaw=0, pitch=.32, locked=null, attackTimer=0, dodgeTimer=0;
+const keys={};
+const input={x:0,y:0};
+
+function choose(type){
+ selected=type;
+ player=type==="Ike"?ike:yez;
+ companion=type==="Ike"?yez:ike;
+ document.querySelector("#select").style.display="none";
+ document.querySelector("#who").textContent="Playing: "+selected;
+ toast(selected+" selected. You control "+selected+" independently.");
+ camera.position.set(player.position.x,7,player.position.z+10);
+}
+chooseIke.onclick=()=>choose("Ike");
+chooseYez.onclick=()=>choose("Yez");
+
+function toast(t){
+ const el=document.querySelector("#toast");el.textContent=t;el.style.display="block";
+ clearTimeout(toast.t);toast.t=setTimeout(()=>el.style.display="none",1800);
+}
+function addTension(n){tension=Math.min(100,tension+n);document.querySelector("#tension").textContent=tension}
+function addConnection(n){connection=Math.min(100,connection+n);document.querySelector("#connection").textContent=connection}
+
+document.addEventListener("keydown",e=>keys[e.key.toLowerCase()]=true);
+document.addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
+
+const stick=document.querySelector("#stick"),knob=document.querySelector("#knob");
+let stickId=null;
+stick.addEventListener("pointerdown",e=>{stickId=e.pointerId;stick.setPointerCapture(stickId);moveStick(e)});
+stick.addEventListener("pointermove",e=>{if(e.pointerId===stickId)moveStick(e)});
+stick.addEventListener("pointerup",resetStick);stick.addEventListener("pointercancel",resetStick);
+function moveStick(e){
+ const r=stick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+ let dx=e.clientX-cx,dy=e.clientY-cy,max=50;
+ const l=Math.hypot(dx,dy);if(l>max){dx*=max/l;dy*=max/l}
+ knob.style.transform=`translate(${dx}px,${dy}px)`;
+ input.x=dx/max;input.y=dy/max;
+}
+function resetStick(){stickId=null;knob.style.transform="";input.x=input.y=0}
+
+function action(name){
+ if(!player)return;
+ if(name==="attack"){attackTimer=.28;addTension(2);hitEnemies()}
+ if(name==="dodge"){dodgeTimer=.35}
+ if(name==="guard"){toast(selected==="Ike"?"Ike raises Shield":"Yez braces herself");addConnection(1)}
+ if(name==="ability"){
+  if(selected==="Ike"){toast("Tactical Insight reveals the route");addConnection(4)}
+  else{toast("Flood of Tears reshapes the path");addConnection(4)}
+ }
+ if(name==="interact"){
+  const d=player.position.distanceTo(portal.position);
+  if(d<6 && orbCount>=5){toast("The portal opens — where are we going?");document.querySelector("#objective").textContent="Portal unlocked!"}
+  else if(d<6)toast("The portal needs 5 orbs.");
+  else toast("Nothing nearby to interact with.");
+ }
+}
+["attack","dodge","guard","ability","interact"].forEach(id=>document.querySelector("#"+id).addEventListener("pointerdown",()=>action(id)));
+
+document.querySelector("#lock").addEventListener("pointerdown",()=>{
+ if(locked){locked=null;toast("Lock-on released");return}
+ let best=null,bd=14;
+ for(const e of enemies){if(e.userData.hp>0){const d=player.position.distanceTo(e.position);if(d<bd){bd=d;best=e}}}
+ locked=best;if(locked)toast("Target locked");else toast("No target in range");
+});
+document.querySelector("#switch").addEventListener("pointerdown",()=>{
+ choose(selected==="Ike"?"Yez":"Ike");
+});
+
+function hitEnemies(){
+ let target=locked;
+ if(!target){
+  let bd=3.2;
+  for(const e of enemies){const d=player.position.distanceTo(e.position);if(e.userData.hp>0&&d<bd){bd=d;target=e}}
+ }
+ if(target){
+  target.userData.hp-=20;
+  const dir=target.position.clone().sub(player.position).normalize();
+  target.position.addScaledVector(dir,1.5);
+  if(target.userData.hp<=0){toast("Enemy defeated");addConnection(5)}
+ }
+}
+
+function updateCompanion(dt){
+ const target=new THREE.Vector3(player.position.x,0,player.position.z);
+ target.add(new THREE.Vector3(selected==="Ike"?2:-2,0,1.5));
+ companion.position.lerp(target,Math.min(1,dt*2.5));
+ companion.lookAt(player.position.x,companion.position.y,player.position.z);
+}
+
+function movement(dt){
+ let x=input.x,y=input.y;
+ if(keys.a)x-=1;if(keys.d)x+=1;if(keys.w)y-=1;if(keys.s)y+=1;
+ const mag=Math.min(1,Math.hypot(x,y)); if(mag<.05)return;
+ const dir=new THREE.Vector3(x,0,y);
+ dir.applyAxisAngle(new THREE.Vector3(0,1,0),yaw);
+ dir.normalize();
+ const speed=dodgeTimer>0?9:5.5;
+ player.position.addScaledVector(dir,speed*dt*mag);
+ player.position.x=THREE.MathUtils.clamp(player.position.x,-37,37);
+ player.position.z=THREE.MathUtils.clamp(player.position.z,-37,37);
+ player.rotation.y=Math.atan2(dir.x,dir.z);
+}
+
+function updateCamera(dt){
+ const target=player.position.clone().add(new THREE.Vector3(0,1.7,0));
+ if(locked && locked.userData.hp>0){
+  const mid=target.clone().add(locked.position).multiplyScalar(.5);
+  const desired=mid.clone().add(new THREE.Vector3(0,6,10));
+  camera.position.lerp(desired,Math.min(1,dt*5));
+  camera.lookAt(mid);
+ }else{
+  const desired=new THREE.Vector3(
+   player.position.x-Math.sin(yaw)*10,
+   player.position.y+6.2,
+   player.position.z-Math.cos(yaw)*10
+  );
+  camera.position.lerp(desired,Math.min(1,dt*5));
+  camera.lookAt(target);
+ }
+}
+
+function updateOrbs(){
+ for(const o of scene.children){
+  if(o.userData?.orb && o.visible && player.position.distanceTo(o.position)<1.6){
+   o.visible=false;orbCount++;document.querySelector("#orbs").textContent=orbCount;toast("Orb collected");addConnection(2);
+  }
+ }
+}
+function updateEnemies(dt){
+ for(const e of enemies){
+  if(e.userData.hp<=0){e.visible=false;continue}
+  e.rotation.y+=dt;
+  const d=e.position.distanceTo(player.position);
+  if(d<9 && d>1.8)e.position.lerp(player.position,dt*.25);
+  if(d<1.7 && dodgeTimer<=0 && attackTimer<=0){hp=Math.max(0,hp-dt*5);document.querySelector("#hp").textContent=Math.round(hp)}
+ }
+}
+
+let last=performance.now();
+function loop(now){
+ const dt=Math.min(.033,(now-last)/1000);last=now;
+ attackTimer=Math.max(0,attackTimer-dt);dodgeTimer=Math.max(0,dodgeTimer-dt);
+ portal.rotation.y+=dt*.7;
+ movement(dt);updateCompanion(dt);updateCamera(dt);updateEnemies(dt);updateOrbs();
+ document.querySelector("#objective").textContent=orbCount<5?`Find the 5 glowing orbs (${orbCount}/5)`:"Reach the portal and interact";
+ renderer.render(scene,camera);requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+addEventListener("resize",()=>{
+ camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);
+});
+</script>
+</body>
+</html>
